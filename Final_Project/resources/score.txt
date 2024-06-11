@@ -1,0 +1,54 @@
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:24:15 2024
+ iiiou 240.545
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:41:45 2024
+ you 239.58
+Mon May 27 22:44:43 2024
+ ok 239.632
+Mon May 27 22:50:29 2024
+ troy 239.643
+Mon May 27 22:54:52 2024
+ NAMEdf 239.669
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:41:45 2024
+ you 239.58
+Mon May 27 22:44:43 2024
+ ok 239.632
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:21:16 2024
+ yyyy 248.801
+Mon May 27 22:41:45 2024
+ you 239.58
+Mon May 27 22:44:43 2024
+ ok 239.632
+Mon May 27 22:56:37 2024
+ ttyyy 239.564
+Mon May 27 23:00:55 2024
+ newone 239.629
+Mon May 27 23:40:40 2024
+ gtisgay 239.74
+Mon May 27 23:51:18 2024
+ second 247.499
+Tue May 28 19:25:01 2024
+ troy 263.442

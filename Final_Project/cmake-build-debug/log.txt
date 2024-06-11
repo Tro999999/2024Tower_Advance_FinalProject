@@ -1,0 +1,34 @@
+[INFO] Game Initializing...
+[INFO] There are total 1 supported mouse buttons
+[INFO] Allegro5 initialized
+[INFO] Game begin
+[INFO] Loaded Resource<image>: resources/images/stage-select/dirt.png scaled to 400x100
+[INFO] Loaded Resource<image>: resources/images/stage-select/dirt.png
+[INFO] Loaded Resource<image>: resources/images/stage-select/floor.png
+[INFO] Loaded Resource<font>: resources/fonts/pirulen.ttf with size 48
+[INFO] Loaded Resource<audio>: resources/audios/select.ogg
+[INFO] Created<sample_instance>: resources/audios/select.ogg
+[INFO] Game initialized
+[INFO] Game start event loop
+[INFO] stopped audio (sample)
+[INFO] Loaded Resource<image>: resources/images/stage-select/slider.png
+[INFO] Loaded Resource<image>: resources/images/stage-select/slider-blue.png
+[INFO] Loaded Resource<image>: resources/images/stage-select/bar.png scaled to 190x4
+[INFO] Loaded Resource<image>: resources/images/stage-select/end.png
+[INFO] Loaded Resource<font>: resources/fonts/pirulen.ttf with size 28
+[INFO] Created<sample_instance>: resources/audios/select.ogg
+[INFO] Changed to setting scene
+[INFO] Game Terminating...
+[INFO] Game terminated
+[INFO] Game end
+[INFO] Destroyed Resource<image>: stage-select/end.png
+[INFO] Destroyed Resource<image>: stage-select/bar.png?190x4
+[INFO] Destroyed Resource<image>: stage-select/dirt.png
+[INFO] Destroyed Resource<image>: stage-select/slider-blue.png
+[INFO] Destroyed Resource<image>: stage-select/dirt.png?400x100
+[INFO] Destroyed Resource<image>: stage-select/slider.png
+[INFO] Destroyed Resource<image>: stage-select/floor.png
+[INFO] Destroyed Resource<font>: pirulen.ttf?28
+[INFO] Destroyed Resource<font>: pirulen.ttf?48
+[INFO] Destroyed<sample_instance>: select.ogg
+[INFO] Destroyed Resource<audio>: select.ogg
