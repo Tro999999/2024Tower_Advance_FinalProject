@@ -1,0 +1,8 @@
+//
+// Created by Troy on 2024/6/14.
+//
+
+#ifndef TOWERDEFENSE_MODE2_HPP
+#define TOWERDEFENSE_MODE2_HPP
+
+#endif //TOWERDEFENSE_MODE2_HPP

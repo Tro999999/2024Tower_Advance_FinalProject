@@ -60,22 +60,6 @@ void ScoreboardScene::LoadScores() {
     std::string line;
     std::vector<std::pair<std::string, int>> scoreLines; // Store lines and their last number
 
-    /*
-    while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string token;
-        int lastNumber = 0;
-
-        // Extract tokens and find the last number
-        while (iss >> token) {
-            try {
-                lastNumber = std::stoi(token);
-            } catch (std::invalid_argument&) {
-                // Skip non-integer tokens
-            }
-        }
-        scoreLines.emplace_back(line, lastNumber);
-    }*/
     if (file.is_open()) {
         std::string line;
         std::string dateTime, playerScore;
@@ -100,18 +84,6 @@ void ScoreboardScene::LoadScores() {
     } else {
         std::cerr << "Error opening score file for reading!" << std::endl;
     }
-
-/*
-    // Sort based on the last number
-    std::sort(scoreLines.begin(), scoreLines.end(), [](const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) {
-        return a.second < b.second;
-    });
-
-    // Store sorted lines in the scores vector
-    scores.clear();
-    for (const auto& scoreLine : scoreLines) {
-        scores.push_back(scoreLine.first);
-    }*/
 }
 
 void ScoreboardScene::DisplayScores() {
@@ -139,7 +111,6 @@ void ScoreboardScene::OnNextPageClick() {
     else{
         currentPage = 1;
     }
-    Engine::GameEngine::GetInstance().ChangeScene("stage-select");
     Engine::GameEngine::GetInstance().ChangeScene("scoreboard");
 }
 
@@ -151,7 +122,6 @@ void ScoreboardScene::OnPrevPageClick() {
     else {
         currentPage--;
     }
-    Engine::GameEngine::GetInstance().ChangeScene("stage-select");
     Engine::GameEngine::GetInstance().ChangeScene("scoreboard");
 }
 

@@ -44,6 +44,6 @@ void StartScene::Terminate() {
 }
 void StartScene::PlayOnClick(int stage) {
 
-   if(stage == 1)Engine::GameEngine::GetInstance().ChangeScene("stage-select");
+   if(stage == 1)Engine::GameEngine::GetInstance().ChangeScene("game-select");
    else Engine::GameEngine::GetInstance().ChangeScene("setting");
 }

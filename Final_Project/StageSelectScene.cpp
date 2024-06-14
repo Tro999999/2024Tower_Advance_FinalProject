@@ -54,18 +54,10 @@ void StageSelectScene::Initialize() {
 
 
     AddNewObject(new Engine::Label("Defeat enemies to defend your territory!", "pirulen.ttf", 35, halfW, halfH / 2 - 150, 200, 20, 20, 255, 0.5, 0.5));
-    /*
-    Slider *sliderBGM, *sliderSFX;
-    sliderBGM = new Slider(40 + halfW - 95, halfH - 50 - 2, 190, 4);
-    sliderBGM->SetOnValueChangedCallback(std::bind(&StageSelectScene::BGMSlideOnValueChanged, this, std::placeholders::_1));
-    AddNewControlObject(sliderBGM);
-    AddNewObject(new Ebel("SFX: ", "pirulen.ttf", 28, 40 + halfW - 60 - 95, halfH + 50, 255, 255, 255, 255, 0.5, 0.5));
-    */
+
      // Not safe if release resource while playing, however we only free while change scene, so it's fine.
 	bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
-    //上面這行要留
-    //sliderBGM->SetValue(AudioHelper::BGMVolume);
-    //sliderSFX->SetValue(AudioHelper::SFXVolume);
+
 
 
 }
