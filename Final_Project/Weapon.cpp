@@ -43,7 +43,7 @@ void Weapon::Update(float deltaTime) {
     MODE2* scene = getMode2Scene();
     // Can be improved by Spatial Hash, Quad Tree, ...
     // However simply loop through all enemies is enough for this program.
-    for (auto& it : scene->EnemyGroup->GetObjects()) {
+    for (auto& it : scene->MonsterGroup->GetObjects()) {
         Monster* monster = dynamic_cast<Monster*>(it);
         if (!monster->Visible)
             continue;

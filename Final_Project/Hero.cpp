@@ -102,7 +102,7 @@ void Hero::Update(float deltaTime) {
 
     }
     else{
-        for (auto& it : scene->EnemyGroup->GetObjects()) {
+        for (auto& it : scene->MonsterGroup->GetObjects()) {
             Engine::Point diff = it->Position - Position;
             if (diff.Magnitude() <= CollisionRadius) {
                 Target = dynamic_cast<Monster*>(it);
@@ -163,4 +163,8 @@ void Hero::Draw() const {
     if (MODE2::DebugMode) {
         al_draw_circle(Position.x, Position.y, CollisionRadius, al_map_rgb(255, 0, 0), 2);
     }
+}
+
+int Hero::GetPrice() const {
+    return price;
 }

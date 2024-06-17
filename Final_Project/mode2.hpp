@@ -11,7 +11,7 @@
 #include "Point.hpp"
 
 
-class Turret;
+class Hero;
 namespace Engine {
     class Group;
     class Image;
@@ -25,7 +25,6 @@ private:
         TILE_DIRT,
         TILE_FLOOR,
         TILE_OCCUPIED,
-        LevelUpTurret
     };
     ALLEGRO_SAMPLE_ID bgmId;
     std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> deathBGMInstance;
@@ -56,11 +55,9 @@ public:
     Group* TileMapGroup;
     Group* GroundEffectGroup;
     Group* DebugIndicatorGroup;
-    Group* BulletGroup;
     Group* ToolGroup;
     Group* TowerGroup;
     Group* HeroGroup;
-    Group* EnemyGroup;
     Group* MonsterGroup;
     Group* WeaponGroup;
     Group* EffectGroup;
@@ -70,10 +67,10 @@ public:
     Engine::Label* UILives;
     Engine::Image* imgTarget;
     Engine::Sprite* dangerIndicator;
-    Turret* preview;
+    Hero* preview;
     std::vector<std::vector<TileType>> mapState;
     std::vector<std::vector<int>> mapDistance;
-    std::list<std::pair<int, float>> enemyWaveData;
+    std::list<std::pair<int, float>> MonsterWaveData;
     std::list<int> keyStrokes;
     static Engine::Point GetClientSize();
     explicit MODE2() = default;
@@ -91,7 +88,7 @@ public:
     int GetMoney() const;
     void EarnMoney(int money);
     void ReadMap();
-    void ReadEnemyWave();
+    void ReadMonsterWave();
     void ConstructUI();
     void ConstructButton(int id, std::string sprite, int price);
     void UIBtnClicked(int id);

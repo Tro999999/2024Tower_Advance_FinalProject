@@ -11,7 +11,6 @@
 
 #include "AudioHelper.hpp"
 #include "DirtyEffect.hpp"
-#include "Enemy.hpp"
 #include "GameEngine.hpp"
 #include "Group.hpp"
 #include "IObject.hpp"
@@ -20,45 +19,43 @@
 #include "Point.hpp"
 #include "Resources.hpp"
 #include "MODE2.hpp"
-// Turret
-#include "PlugGunTurret.hpp"
-#include "L0Turret.hpp"
-#include "L2Turret.hpp"
-#include "L3Turret.hpp"
-#include "L4Turret.hpp"
-#include "L5Turret.hpp"
-#include "LaserTurret.hpp"
-#include "MachineGunTurret.hpp"
-#include "MissileTurret.hpp"
+// Hero
+#include "PlugGunHero.hpp"
+#include "L0Hero.hpp"
+#include "L2Hero.hpp"
+#include "L3Hero.hpp"
+#include "L4Hero.hpp"
+#include "L5Hero.hpp"
+#include "LaserHero.hpp"
+#include "MachineGunHero.hpp"
+#include "MissileHero.hpp"
 #include "Plane.hpp"
 
 #include "SettingScene.hpp"
 #include "ScoreboardScene.hpp"
-#include "MoveTurret.hpp"
 #include "NormalHero.hpp"
 #include "Weapon.hpp"
 
 //Tool
 #include "MoveTool.hpp"
 #include "Shovel.hpp"
-// Enemy
-#include "Enemy.hpp"
-#include "PoopEnemy.hpp"
-#include "DevilEnemy.hpp"
+// Monster
+#include "PoopMonster.hpp"
+#include "DevilMonster.hpp"
 #include "wolfknight.hpp"
-#include "RedNormalEnemy.hpp"
-#include "BossEnemy.hpp"
-#include "DiceEnemy.hpp"
-#include "DiceEnemy_2.hpp"
-#include "BlueNormalEnemy.hpp"
+#include "RedNormalMonster.hpp"
+#include "BossMonster.hpp"
+#include "DiceMonster.hpp"
+#include "DiceMonster_2.hpp"
+#include "BlueNormalMonster.hpp"
 #include "mode2.hpp"
 #include "Resources.hpp"
 #include "Sprite.hpp"
 #include "Hero.hpp"
 #include "Bullet.hpp"
 #include "Monster.hpp"
-#include "Turret.hpp"
-#include "TurretButton.hpp"
+#include "Hero.hpp"
+#include "HeroButton.hpp"
 #include "LOG.hpp"
 #include "Collider.hpp"
 #include "Point.hpp"
@@ -111,7 +108,7 @@ void MODE2::Initialize() {
 
     startTime = al_get_time();
 
-    ReadEnemyWave();
+    ReadMonsterWave();
     mapDistance = CalculateBFSDistance();
     ConstructUI();
     imgTarget = new Engine::Image("play/target.png", 0, 0);
@@ -133,7 +130,7 @@ void MODE2::Initialize() {
 
     MODE2* scene = dynamic_cast<MODE2*>(Engine::GameEngine::GetInstance().GetScene("mode2"));
     if (!mute)
-            bgmInstance = AudioHelper::PlaySample("play2.ogg", true, AudioHelper::BGMVolume);
+        bgmInstance = AudioHelper::PlaySample("play2.ogg", true, AudioHelper::BGMVolume);
     else
         bgmInstance = AudioHelper::PlaySample("play.ogg", true, 0.0);
 }
@@ -162,8 +159,8 @@ void MODE2::Update(float deltaTime) {
         SpeedMult = 1;
     // Calculate danger zone.
     std::vector<float> reachEndTimes;
-    for (auto& it : EnemyGroup->GetObjects()) {
-        reachEndTimes.push_back(dynamic_cast<Enemy*>(it)->reachEndTime);
+    for (auto& it : MonsterGroup->GetObjects()) {
+        reachEndTimes.push_back(dynamic_cast<Monster*>(it)->reachEndTime);
     }
 
     std::sort(reachEndTimes.begin(), reachEndTimes.end());
@@ -205,8 +202,8 @@ void MODE2::Update(float deltaTime) {
         for (int i = 0; i < SpeedMult; i++) {
             IScene::Update(deltaTime);
             ticks += deltaTime;
-            if (enemyWaveData.empty()) {
-                if (EnemyGroup->GetObjects().empty()) {
+            if (MonsterWaveData.empty()) {
+                if (MonsterGroup->GetObjects().empty()) {
                     if(Check){
                         MapId = 2;
                         Check = 0;
@@ -219,48 +216,48 @@ void MODE2::Update(float deltaTime) {
             }
 
 
-            auto current = enemyWaveData.front();
+            auto current = MonsterWaveData.front();
             if (ticks < current.second)
                 continue;
             ticks -= current.second;
-            enemyWaveData.pop_front();
+            MonsterWaveData.pop_front();
             const Engine::Point SpawnCoordinate = Engine::Point(SpawnGridPoint.x * BlockSize + BlockSize / 2,
                                                                 SpawnGridPoint.y * BlockSize + BlockSize / 2);
 
-            Enemy *enemy;
+            Monster *Monster;
             switch (current.first) {
                 case 1:
-                    EnemyGroup->AddNewObject(enemy = new RedNormalEnemy(SpawnCoordinate.x, SpawnCoordinate.y));
+                    MonsterGroup->AddNewObject(Monster = new RedNormalMonster(SpawnCoordinate.x, SpawnCoordinate.y));
                     break;
                 case 2:
-                    //std::cout << "enemy : 2\n" ;
-                    EnemyGroup->AddNewObject(enemy = new BlueNormalEnemy(SpawnCoordinate.x, SpawnCoordinate.y));
+                    //std::cout << "Monster : 2\n" ;
+                    MonsterGroup->AddNewObject(Monster = new BlueNormalMonster(SpawnCoordinate.x, SpawnCoordinate.y));
                     break;
                 case 3:
-                    EnemyGroup->AddNewObject(enemy = new DiceEnemy_2(SpawnCoordinate.x, SpawnCoordinate.y));
+                    MonsterGroup->AddNewObject(Monster = new DiceMonster_2(SpawnCoordinate.x, SpawnCoordinate.y));
                     break;
                 case 4:
-                    EnemyGroup->AddNewObject(enemy = new BossEnemy(SpawnCoordinate.x, SpawnCoordinate.y));
+                    MonsterGroup->AddNewObject(Monster = new BossMonster(SpawnCoordinate.x, SpawnCoordinate.y));
                     break;
                     //case 5 6
                 case 7:
-                    EnemyGroup->AddNewObject(enemy = new DevilEnemy(SpawnCoordinate.x, SpawnCoordinate.y));
+                    MonsterGroup->AddNewObject(Monster = new DevilMonster(SpawnCoordinate.x, SpawnCoordinate.y));
                     break;
                 case 5:
-                    EnemyGroup->AddNewObject(enemy = new PoopEnemy(SpawnCoordinate.x, SpawnCoordinate.y));
+                    MonsterGroup->AddNewObject(Monster = new PoopMonster(SpawnCoordinate.x, SpawnCoordinate.y));
                     break;
                 case 6:
-                    EnemyGroup->AddNewObject(enemy = new DiceEnemy(SpawnCoordinate.x, SpawnCoordinate.y));
+                    MonsterGroup->AddNewObject(Monster = new DiceMonster(SpawnCoordinate.x, SpawnCoordinate.y));
                     break;
                 case 8:
-                    EnemyGroup->AddNewObject(enemy = new wolfknight(SpawnCoordinate.x, SpawnCoordinate.y));
+                    //MonsterGroup->AddNewObject(Monster = new wolfknight(SpawnCoordinate.x, SpawnCoordinate.y));
                     break;
                 default:
                     continue;
             }
-            enemy->UpdatePath(mapDistance);
+            Monster->UpdatePath(mapDistance);
             // Compensate the time lost.
-            enemy->Update(ticks);
+            Monster->Update(ticks);
         }
     }
     for (auto& it : HeroGroup->GetObjects()) {
@@ -297,7 +294,7 @@ void MODE2::Draw() const {
 }
 void MODE2::OnMouseDown(int button, int mx, int my) {
     if ((button & 1) && !imgTarget->Visible && preview) {
-        // Cancel turret construct.
+        // Cancel Hero construct.
         UIGroup->RemoveObject(preview->GetObjectIterator());
         preview = nullptr;
     }
@@ -307,7 +304,7 @@ void MODE2::OnMouseMove(int mx, int my) {
 }
 void MODE2::OnMouseUp(int button, int mx, int my) {
     const Engine::Point EndCoordinate = Engine::Point(EndGridPoint.x * BlockSize + BlockSize / 2,
-                                                        EndGridPoint.y * BlockSize + BlockSize / 2);
+                                                      EndGridPoint.y * BlockSize + BlockSize / 2);
     IScene::OnMouseUp(button, mx, my);
     Hero* hero;
     if (!imgTarget->Visible)
@@ -340,11 +337,11 @@ void MODE2::OnMouseUp(int button, int mx, int my) {
             // Remove Preview.
             preview->GetObjectIterator()->first = false;
             UIGroup->RemoveObject(preview->GetObjectIterator());
-            // Construct real turret.
+            // Construct real Hero.
             preview->Position.x = x * BlockSize + BlockSize / 2;
             preview->Position.y = y * BlockSize + BlockSize / 2;
-            preview->Enabled = true;
-            preview->Preview = false;
+            //preview->Enabled = true;
+            //preview->Preview = false;
             preview->Tint = al_map_rgba(255, 255, 255, 255);
             TowerGroup->AddNewObject(preview);
 
@@ -382,35 +379,35 @@ void MODE2::OnKeyDown(int keyCode) {
         }
     }
     if (keyCode == ALLEGRO_KEY_Q) {
-        // Hotkey for PlugGunTurret.
+        // Hotkey for PlugGunHero.
         UIBtnClicked(0);
     }
     else if (keyCode == ALLEGRO_KEY_W) {
-        // Hotkey for new turret.
+        // Hotkey for new Hero.
         UIBtnClicked(1);
     }
     else if (keyCode == ALLEGRO_KEY_A) {
-        // Hotkey for new turret.
+        // Hotkey for new Hero.
         UIBtnClicked(10);
     }
     else if (keyCode == ALLEGRO_KEY_E) {
-        // Hotkey for new turret.
+        // Hotkey for new Hero.
         UIBtnClicked(2);
     }
     else if (keyCode == ALLEGRO_KEY_T) {
-        // Hotkey for new turret.
+        // Hotkey for new Hero.
         UIBtnClicked(4);
     }
     else if (keyCode == ALLEGRO_KEY_S) {
-        // Hotkey for new turret.
+        // Hotkey for new Hero.
         UIBtnClicked(11);
     }
     else if (keyCode == ALLEGRO_KEY_R) {
-        // Hotkey for new turret.
+        // Hotkey for new Hero.
         UIBtnClicked(3);
     }
     else if (keyCode == ALLEGRO_KEY_D) {
-        // Hotkey for new turret.
+        // Hotkey for new Hero.
         UIBtnClicked(12);
     }
     else if (keyCode >= ALLEGRO_KEY_0 && keyCode <= ALLEGRO_KEY_9) {
@@ -491,15 +488,15 @@ void MODE2::ReadMap() {
         }
     }
 }
-void MODE2::ReadEnemyWave() {
+void MODE2::ReadMonsterWave() {
     std::string filename = std::string("resources/enemy") + std::to_string(MapId) + ".txt";
-    // Read enemy file.
+    // Read Monster file.
     float type, wait, repeat;
-    enemyWaveData.clear();
+    MonsterWaveData.clear();
     std::ifstream fin(filename);
     while (fin >> type && fin >> wait && fin >> repeat) {
         for (int i = 0; i < repeat; i++)
-            enemyWaveData.emplace_back(type, wait);
+            MonsterWaveData.emplace_back(type, wait);
     }
     fin.close();
 }
@@ -519,20 +516,20 @@ void MODE2::ConstructUI() {
                 Time = new Engine::Label(std::to_string(static_cast<int>(elapsedTime)) , "pirulen.ttf", 48, 1500, 50));
 
         // Buttons
-        ConstructButton(0, "play/turret-6.png", PlugGunTurret::Price);
+        ConstructButton(0, "play/enemy-6.png", PlugGunHero::Price);
         AddNewObject(new Engine::Label("$40", "pirulen.ttf", 18, 1325, 210, 50, 200, 255, 255, 0.5, 0.5));
-        ConstructButton(1, "play/turret-1.png", L3Turret::Price);
+        ConstructButton(1, "play/enemy-1.png", L3Hero::Price);
         AddNewObject(new Engine::Label("$100", "pirulen.ttf", 18, 1400, 210, 100, 150, 255, 255, 0.5, 0.5));
-        ConstructButton(2, "play/Dragon.png", L0Turret::Price);
+        ConstructButton(2, "play/Dragon.png", L0Hero::Price);
         AddNewObject(new Engine::Label("$400", "pirulen.ttf", 18, 1475, 210, 255, 100, 255, 255, 0.5, 0.5));
-        ConstructButton(3, "play/mario.png", L5Turret::Price);
+        ConstructButton(3, "play/mario.png", L5Hero::Price);
         AddNewObject(new Engine::Label("$8000", "pirulen.ttf", 18, 1550, 210, 300, 50, 255, 255, 0.5, 0.5));
 
-        ConstructButton(6, "play/turret-2.png", LaserTurret::Price);
+        ConstructButton(6, "play/enemy-2.png", LaserHero::Price);
         AddNewObject(new Engine::Label("$20", "pirulen.ttf", 18, 1325, 330, 300, 50, 255, 255, 0.5, 0.5));
-        ConstructButton(7, "play/turret-3.png", LaserTurret::Price);
+        ConstructButton(7, "play/enemy-3.png", LaserHero::Price);
         AddNewObject(new Engine::Label("$300", "pirulen.ttf", 18, 1400, 330, 300, 50, 255, 255, 0.5, 0.5));
-        ConstructButton(8, "play/turret-7.png", LaserTurret::Price);
+        ConstructButton(8, "play/enemy-7.png", LaserHero::Price);
         AddNewObject(new Engine::Label("$50", "pirulen.ttf", 18, 1475, 330, 300, 50, 255, 255, 0.5, 0.5));
 
         ConstructButton(10, "play/MoveTool.png", 0);
@@ -553,82 +550,82 @@ void MODE2::ConstructUI() {
 }
 
 void MODE2::ConstructButton(int id, std::string sprite, int price) {
-    TurretButton* btn;
+    HeroButton* btn;
     if (id <= 3) {
-        btn = new TurretButton("play/floor.png", "play/dirt.png",
-                               Engine::Sprite("play/tower-base.png", 1294 + id * 76, 136, 0, 0, 0, 0),
-                               Engine::Sprite(sprite, 1294 + id * 76, 136 - 8, 0, 0, 0, 0)
+        btn = new HeroButton("play/floor.png", "play/dirt.png",
+                             Engine::Sprite("play/tower-base.png", 1294 + id * 76, 136, 0, 0, 0, 0),
+                             Engine::Sprite(sprite, 1294 + id * 76, 136 - 8, 0, 0, 0, 0)
                 , 1294 + id * 76, 136, price);
         btn->SetOnClickCallback(std::bind(&MODE2::UIBtnClicked, this, id));
         UIGroup->AddNewControlObject(btn);
     }
     else if(id == 4){
-        btn = new TurretButton("play/floor.png", "play/dirt.png",
-                               Engine::Sprite("play/tower-base.png", 1294 + (id-4) * 76, 240, 0, 0, 0, 0),
-                               Engine::Sprite(sprite, 1294 + (id-4) * 76, 240 , 0, 0, 0, 0)
+        btn = new HeroButton("play/floor.png", "play/dirt.png",
+                             Engine::Sprite("play/tower-base.png", 1294 + (id-4) * 76, 240, 0, 0, 0, 0),
+                             Engine::Sprite(sprite, 1294 + (id-4) * 76, 240 , 0, 0, 0, 0)
                 , 1294 + (id-4) * 76, 136, price);
         btn->SetOnClickCallback(std::bind(&MODE2::UIBtnClicked, this, id));
         UIGroup->AddNewControlObject(btn);
     }
     else if(id == 5){
-        btn = new TurretButton("play/floor.png", "play/dirt.png",
-                               Engine::Sprite("play/tower-base.png", 1294 + (id-5) * 76, 240, 0, 0, 0, 0),
-                               Engine::Sprite(sprite, 1294 + (id-5) * 76, 240 , 0, 0, 0, 0)
+        btn = new HeroButton("play/floor.png", "play/dirt.png",
+                             Engine::Sprite("play/tower-base.png", 1294 + (id-5) * 76, 240, 0, 0, 0, 0),
+                             Engine::Sprite(sprite, 1294 + (id-5) * 76, 240 , 0, 0, 0, 0)
                 , 1294 + (id-5) * 76, 240, price);
         btn->SetOnClickCallback(std::bind(&MODE2::UIBtnClicked, this, id));
         UIGroup->AddNewControlObject(btn);
     }
     else if(id == 6){
-        btn = new TurretButton("play/floor.png", "play/dirt.png",
-                               Engine::Sprite("play/tower-base.png", 1294 + 76*0 , 240, 0, 0, 0, 0),
-                               Engine::Sprite(sprite, 1294 , 240 , 0, 0, 0, 0)
+        btn = new HeroButton("play/floor.png", "play/dirt.png",
+                             Engine::Sprite("play/tower-base.png", 1294 + 76*0 , 240, 0, 0, 0, 0),
+                             Engine::Sprite(sprite, 1294 , 240 , 0, 0, 0, 0)
                 , 1294 , 240, price);
         btn->SetOnClickCallback(std::bind(&MODE2::UIBtnClicked, this, id));
         UIGroup->AddNewControlObject(btn);
     }
     else if(id == 7){
-        btn = new TurretButton("play/floor.png", "play/dirt.png",
-                               Engine::Sprite("play/tower-base.png", 1294 + 76 , 240, 0, 0, 0, 0),
-                               Engine::Sprite(sprite, 1294+76 , 240 , 0, 0, 0, 0)
+        btn = new HeroButton("play/floor.png", "play/dirt.png",
+                             Engine::Sprite("play/tower-base.png", 1294 + 76 , 240, 0, 0, 0, 0),
+                             Engine::Sprite(sprite, 1294+76 , 240 , 0, 0, 0, 0)
                 , 1294+76 , 240, price);
         btn->SetOnClickCallback(std::bind(&MODE2::UIBtnClicked, this, id));
         UIGroup->AddNewControlObject(btn);
     }
     else if(id == 8){
-        btn = new TurretButton("play/floor.png", "play/dirt.png",
-                               Engine::Sprite("play/tower-base.png", 1294 + 76*2 , 240, 0, 0, 0, 0),
-                               Engine::Sprite(sprite, 1294+76*2 , 240 , 0, 0, 0, 0)
+        btn = new HeroButton("play/floor.png", "play/dirt.png",
+                             Engine::Sprite("play/tower-base.png", 1294 + 76*2 , 240, 0, 0, 0, 0),
+                             Engine::Sprite(sprite, 1294+76*2 , 240 , 0, 0, 0, 0)
                 , 1294+76*2 , 240, price);
         btn->SetOnClickCallback(std::bind(&MODE2::UIBtnClicked, this, id));
         UIGroup->AddNewControlObject(btn);
     }
     else if (id == 10){
-        btn = new TurretButton("play/floor.png", "play/dirt.png",
-                               Engine::Sprite("play/tower-base.png",1294 + (id-10) * 76, 250+114, 0, 0, 0, 0),
-                               Engine::Sprite(sprite, 1294 + (id-10) * 76, 250+114, 0, 0, 0, 0)
+        btn = new HeroButton("play/floor.png", "play/dirt.png",
+                             Engine::Sprite("play/tower-base.png",1294 + (id-10) * 76, 250+114, 0, 0, 0, 0),
+                             Engine::Sprite(sprite, 1294 + (id-10) * 76, 250+114, 0, 0, 0, 0)
                 , 1294 + (id-10) * 76, 250+114, price);
         btn->SetOnClickCallback(std::bind(&MODE2::UIBtnClicked, this, id));
         UIGroup->AddNewControlObject(btn);
     }
     else if (id == 11){
-        btn = new TurretButton("play/floor.png", "play/dirt.png",
-                               Engine::Sprite("play/tower-base.png",1294 + (id-10) * 76, 250+114, 0, 0, 0, 0),
-                               Engine::Sprite(sprite, 1294 + (id-10) * 76, 250+114, 0, 0, 0, 0)
+        btn = new HeroButton("play/floor.png", "play/dirt.png",
+                             Engine::Sprite("play/tower-base.png",1294 + (id-10) * 76, 250+114, 0, 0, 0, 0),
+                             Engine::Sprite(sprite, 1294 + (id-10) * 76, 250+114, 0, 0, 0, 0)
                 , 1294 + (id-10) * 76, 250+114, price);
         btn->SetOnClickCallback(std::bind(&MODE2::UIBtnClicked, this, id));
         UIGroup->AddNewControlObject(btn);
     }else if (id == 13){
-        btn = new TurretButton("play/floor.png", "play/dirt.png",
-                               Engine::Sprite("play/tower-base.png",1294 + (id-10) * 76, 250+114, 0, 0, 0, 0),
-                               Engine::Sprite(sprite, 1294 + (id-10) * 76, 250+114, 0, 0, 0, 0)
+        btn = new HeroButton("play/floor.png", "play/dirt.png",
+                             Engine::Sprite("play/tower-base.png",1294 + (id-10) * 76, 250+114, 0, 0, 0, 0),
+                             Engine::Sprite(sprite, 1294 + (id-10) * 76, 250+114, 0, 0, 0, 0)
                 , 1294 + (id-10) * 76, 250+114, price);
         btn->SetOnClickCallback(std::bind(&MODE2::UIBtnClicked, this, id));
         UIGroup->AddNewControlObject(btn);
     }
     else if (id == 12){
-        btn = new TurretButton("play/floor.png", "play/dirt.png",
-                               Engine::Sprite("play/tower-base.png",1294 + (id-10) * 76, 250+114, 0, 0, 0, 0),
-                               Engine::Sprite(sprite, 1294 + (id-10) * 76, 250+114, 0, 0, 0, 0)
+        btn = new HeroButton("play/floor.png", "play/dirt.png",
+                             Engine::Sprite("play/tower-base.png",1294 + (id-10) * 76, 250+114, 0, 0, 0, 0),
+                             Engine::Sprite(sprite, 1294 + (id-10) * 76, 250+114, 0, 0, 0, 0)
                 , 1294 + (id-10) * 76, 250+114, price);
         btn->SetOnClickCallback(std::bind(&MODE2::UIBtnClicked, this, id));
         UIGroup->AddNewControlObject(btn);
@@ -636,25 +633,27 @@ void MODE2::ConstructButton(int id, std::string sprite, int price) {
 }
 
 void MODE2::UIBtnClicked(int id) {
+    const Engine::Point SpawnCoordinate = Engine::Point(EndGridPoint.x * BlockSize + BlockSize / 2,
+                                                        EndGridPoint.y * BlockSize + BlockSize / 2);
+    Hero *Hero;
     if(1) {
         if (preview) {
             UIGroup->RemoveObject(preview->GetObjectIterator());
             preview = nullptr;
-        } else if (id == 0 && money >= PlugGunTurret::Price)
-            preview = new PlugGunTurret(0, 0);
-        else if (id == 1 && money >= L2Turret::Price)
-            preview = new L3Turret(0, 0);
-        else if (id == 2 && money >= L0Turret::Price)
-            preview = new L0Turret(0, 0);
-        else if (id == 3 && money >= L5Turret::Price)
-            preview = new L5Turret(0, 0);
-
-        else if (id == 6 && money >= LaserTurret::Price)
-            preview = new LaserTurret(0, 0);
-        else if (id == 7 && money >= MissileTurret::Price)
-            preview = new MissileTurret(0, 0);
-        else if (id == 8 && money >= MachineGunTurret::Price)
-            preview = new MachineGunTurret(0, 0);
+        } else if (id == 0 && money >= PlugGunHero::Price)
+            HeroGroup->AddNewObject(Hero = new PlugGunHero(SpawnCoordinate.x, SpawnCoordinate.y));
+        else if (id == 1 && money >= L3Hero::Price)
+            HeroGroup->AddNewObject(Hero = new L3Hero(SpawnCoordinate.x, SpawnCoordinate.y));
+        else if (id == 2 && money >= L0Hero::Price)
+            HeroGroup->AddNewObject(Hero = new L0Hero(SpawnCoordinate.x, SpawnCoordinate.y));
+        else if (id == 3 && money >= L5Hero::Price)
+            HeroGroup->AddNewObject(Hero = new L5Hero(SpawnCoordinate.x, SpawnCoordinate.y));
+        else if (id == 6 && money >= LaserHero::Price)
+            HeroGroup->AddNewObject(Hero = new LaserHero(SpawnCoordinate.x, SpawnCoordinate.y));
+        else if (id == 7 && money >= MissileHero::Price)
+            HeroGroup->AddNewObject(Hero = new MissileHero(SpawnCoordinate.x, SpawnCoordinate.y));
+        else if (id == 8 && money >= MachineGunHero::Price)
+            HeroGroup->AddNewObject(Hero = new MachineGunHero(SpawnCoordinate.x, SpawnCoordinate.y));
 
         else if (id == 12) {
             MODE2::EarnMoney(10);
@@ -662,41 +661,29 @@ void MODE2::UIBtnClicked(int id) {
             return;
         } else if (id == 13) {
             if (money >= 1500) {
-                EarnMoney(-1500);
+                MODE2::EarnMoney(-1500);
                 UILives->Text = std::string("Life ") + std::to_string(++lives);
                 //UseTool = 4;
             } else {
 
             }
             return;
-        } else if (id == 10) {
-            preview = new MoveTool(0, 0);
-            UTool = 1;
-        } else if (id == 11) {
-            preview = new Shovel(0, 0);
-            UTool = 2;
         }
         if (!preview)
             return;
         preview->Position = Engine::GameEngine::GetInstance().GetMousePosition();
         preview->Tint = al_map_rgba(255, 255, 255, 200);
-        preview->Enabled = false;
-        preview->Preview = true;
+        //preview->Enabled = false;
+        //preview->Preview = true;
         UIGroup->AddNewObject(preview);
         OnMouseMove(Engine::GameEngine::GetInstance().GetMousePosition().x,
                     Engine::GameEngine::GetInstance().GetMousePosition().y);
-    }
-    else{
-
     }
 }
 
 bool MODE2::CheckSpaceValid(int x, int y) {
     if (x < 0 || x >= MapWidth || y < 0 || y >= MapHeight)
         return false;
-    if (mapState[y][x] == LevelUpTurret) {
-        return false;
-    }
 
     auto map00 = mapState[y][x];
     mapState[y][x] = TILE_OCCUPIED;
@@ -704,7 +691,7 @@ bool MODE2::CheckSpaceValid(int x, int y) {
     mapState[y][x] = map00;
     if (map[0][0] == -1)
         return false;
-    for (auto& it : EnemyGroup->GetObjects()) {
+    for (auto& it : MonsterGroup->GetObjects()) {
         Engine::Point pnt;
         pnt.x = floor(it->Position.x / BlockSize);
         pnt.y = floor(it->Position.y / BlockSize);
@@ -715,11 +702,11 @@ bool MODE2::CheckSpaceValid(int x, int y) {
         if (map[pnt.y][pnt.x] == -1)
             return false;
     }
-    // All enemy have path to exit.
+    // All Monster have path to exit.
     mapState[y][x] = TILE_OCCUPIED;
     mapDistance = map;
-    for (auto& it : EnemyGroup->GetObjects())
-        dynamic_cast<Enemy*>(it)->UpdatePath(mapDistance);
+    for (auto& it : MonsterGroup->GetObjects())
+        dynamic_cast<Monster*>(it)->UpdatePath(mapDistance);
     return true;
 }
 std::vector<std::vector<int>> MODE2::CalculateBFSDistance() {
