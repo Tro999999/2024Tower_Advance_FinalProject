@@ -80,7 +80,7 @@ void WinScene::Update(float deltaTime) {
 }
 void WinScene::BackOnClick(int stage) {
     // Change to select scene.
-    Engine::GameEngine::GetInstance().ChangeScene("stage-select");
+    Engine::GameEngine::GetInstance().ChangeScene("mode1");
 }
 
 void WinScene::Draw() const {

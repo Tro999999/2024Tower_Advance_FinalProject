@@ -9,11 +9,13 @@
 #include "SettingScene.hpp"
 #include "ScoreboardScene.hpp"
 #include "GameSelectScene.hpp"
+#include "mode2.hpp"
 
 int main(int argc, char **argv) {
 	Engine::LOG::SetConfig(true);
 	Engine::GameEngine& game = Engine::GameEngine::GetInstance();
 	game.AddNewScene("mode1", new StageSelectScene());
+    game.AddNewScene("mode2", new MODE2());
 	game.AddNewScene("play", new PlayScene());
 	game.AddNewScene("lose", new LoseScene());
 	game.AddNewScene("win", new WinScene());

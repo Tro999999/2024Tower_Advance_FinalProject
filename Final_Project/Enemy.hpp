@@ -11,6 +11,7 @@ class Bullet;
 class PlayScene;
 class Turret;
 
+
 class Enemy : public Engine::Sprite {
 protected:
  	std::vector<Engine::Point> path;

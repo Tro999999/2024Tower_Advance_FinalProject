@@ -19,6 +19,7 @@
 #include "IScene.hpp"
 #include "LOG.hpp"
 #include "PlayScene.hpp"
+#include "mode2.hpp"
 #include "Turret.hpp"
 #include "GoldenBullet.hpp"
 #include "DoubleBullet.hpp"
@@ -32,6 +33,7 @@
 PlayScene* Enemy::getPlayScene() {
 	return dynamic_cast<PlayScene*>(Engine::GameEngine::GetInstance().GetActiveScene());
 }
+
 void Enemy::OnExplode() {
 	getPlayScene()->EffectGroup->AddNewObject(new ExplosionEffect(Position.x, Position.y));
 	std::random_device dev;

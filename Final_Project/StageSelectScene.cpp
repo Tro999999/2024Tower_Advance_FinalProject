@@ -83,7 +83,7 @@ void StageSelectScene::PlayOnClick(int stage) {
         Engine::GameEngine::GetInstance().ChangeScene("play");
     }
     else if(stage == 4){
-        StageSelectScene::Terminate();
+        Engine::GameEngine::GetInstance().ChangeScene("game-select");
     }
     else if(stage == 5){
         Engine::GameEngine::GetInstance().ChangeScene("scoreboard");

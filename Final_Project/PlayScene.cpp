@@ -600,7 +600,7 @@ void PlayScene::OnKeyDown(int keyCode) {
 	}
     else if(keyCode == ALLEGRO_KEY_ESCAPE){
         AudioHelper::ChangeSampleVolume(bgmInstance, 0.0);
-        Engine::GameEngine::GetInstance().ChangeScene("stage-select");
+        Engine::GameEngine::GetInstance().ChangeScene("mode1");
     }
     else if(keyCode == ALLEGRO_KEY_UP){
 

@@ -127,7 +127,7 @@ void ScoreboardScene::OnPrevPageClick() {
 
 
 void ScoreboardScene::PlayOnClick(int stage) {
-    Engine::GameEngine::GetInstance().ChangeScene("stage-select");
+    Engine::GameEngine::GetInstance().ChangeScene("mode1");
 }
 
 void ScoreboardScene::Terminate() {

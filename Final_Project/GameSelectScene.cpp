@@ -43,6 +43,13 @@ void GameSelectScene::Terminate() {
 void GameSelectScene::GameModeOnClick(int mode) {
     // 这里你可以根据 mode 的值切换到不同的游戏模式场景
     // 例如：Engine::GameEngine::GetInstance().ChangeScene("mode" + std::to_string(mode));
-    std::string sceneName = "mode" + std::to_string(mode);
-    Engine::GameEngine::GetInstance().ChangeScene(sceneName);
+    if(mode == 1){
+        Engine::GameEngine::GetInstance().ChangeScene("mode1");
+    }
+    else if(mode == 2){
+        Engine::GameEngine::GetInstance().ChangeScene("mode2");
+    }
+    else{
+        Engine::GameEngine::GetInstance().ChangeScene("mode3");
+    }
 }
