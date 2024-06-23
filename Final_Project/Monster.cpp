@@ -7,12 +7,12 @@
 
 #include "AudioHelper.hpp"
 #include "Bullet.hpp"
-#include "DirtyEffect.hpp"
+#include "DirtyEffect2.hpp"
 #include "Monster.hpp"
 #include "DiceMonster.hpp"
 #include "DevilMonster.hpp"
 #include "wolfknight.hpp"
-#include "ExplosionEffect.hpp"
+#include "ExplosionEffect2.hpp"
 #include "ShootEffect.hpp"
 #include "GameEngine.hpp"
 #include "Group.hpp"
@@ -34,13 +34,13 @@ MODE2* Monster::getMode2Scene() {
 }
 
 void Monster::OnExplode() {
-    getMode2Scene()->EffectGroup->AddNewObject(new ExplosionEffect(Position.x, Position.y));
+    getMode2Scene()->EffectGroup->AddNewObject(new ExplosionEffect2(Position.x, Position.y));
     std::random_device dev;
     std::mt19937 rng(dev());
     std::uniform_int_distribution<std::mt19937::result_type> distId(1, 3);
     std::uniform_int_distribution<std::mt19937::result_type> dist(1, 20);
     for (int i = 0; i < 10; i++) {
-        getMode2Scene()->GroundEffectGroup->AddNewObject(new DirtyEffect("play/dirty-" + std::to_string(distId(rng)) + ".png", dist(rng), Position.x, Position.y));
+        getMode2Scene()->GroundEffectGroup->AddNewObject(new DirtyEffect2("play/dirty-" + std::to_string(distId(rng)) + ".png", dist(rng), Position.x, Position.y));
     }
 }
 Monster::Monster(std::string img, float x, float y, float radius, float speed, float hp, int money) :

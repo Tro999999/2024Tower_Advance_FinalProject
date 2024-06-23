@@ -25,6 +25,7 @@ private:
         TILE_DIRT,
         TILE_FLOOR,
         TILE_OCCUPIED,
+        LevelUpTurret
     };
     ALLEGRO_SAMPLE_ID bgmId;
     std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> deathBGMInstance;
@@ -37,6 +38,7 @@ protected:
     float startTime;
     float elapsedTime;
     float lastUpdateTime;
+    int currentSelectedButtonID ;
 public:
     static bool DebugMode;
     static const std::vector<Engine::Point> directions;
@@ -69,7 +71,9 @@ public:
     Engine::Sprite* dangerIndicator;
     Hero* preview;
     std::vector<std::vector<TileType>> mapState;
+    std::vector<std::vector<TileType>> rmapState;
     std::vector<std::vector<int>> mapDistance;
+    std::vector<std::vector<int>> rmapDistance;
     std::list<std::pair<int, float>> MonsterWaveData;
     std::list<int> keyStrokes;
     static Engine::Point GetClientSize();
@@ -84,7 +88,6 @@ public:
     void OnMouseUp(int button, int mx, int my) override;
     void OnKeyDown(int keyCode) override;
     void Hit();
-    void Attack();
     int GetMoney() const;
     void EarnMoney(int money);
     void ReadMap();
@@ -92,9 +95,9 @@ public:
     void ConstructUI();
     void ConstructButton(int id, std::string sprite, int price);
     void UIBtnClicked(int id);
-    bool CheckSpaceValid(int x, int y);
     float GetElapsedTime() const; // Add this method
     std::vector<std::vector<int>> CalculateBFSDistance();
+    std::vector<std::vector<int>> CalculateDistance();
     // void ModifyReadMapTiles();
 };
 #endif

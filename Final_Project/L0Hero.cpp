@@ -8,7 +8,7 @@
 #include "RocketWeapon.hpp"
 #include "mode2.hpp"
 #include "Point.hpp"
-#include "ShootEffect.hpp"
+#include "HeroShootEffect.hpp"
 #include "GoldenWeapon.hpp"
 
 
@@ -26,7 +26,7 @@ void L0Hero::CreateBullet()
     Engine::Point normalized = diff.Normalize();
     Engine::Point bulletPosition = Position + normalized * 36;
     getMode2Scene()->WeaponGroup->AddNewObject(new GoldenWeapon(bulletPosition, diff, rotation, this));
-    getMode2Scene()->EffectGroup->AddNewObject(new ShootEffect(bulletPosition.x, bulletPosition.y));
+    getMode2Scene()->EffectGroup->AddNewObject(new HeroShootEffect(bulletPosition.x, bulletPosition.y));
     AudioHelper::PlayAudio("gun.wav");
 }
 

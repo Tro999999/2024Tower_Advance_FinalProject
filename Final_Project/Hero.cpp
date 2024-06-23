@@ -7,10 +7,10 @@
 
 #include "AudioHelper.hpp"
 #include "Bullet.hpp"
-#include "DirtyEffect.hpp"
+#include "DirtyEffect2.hpp"
 #include "wolfknight.hpp"
-#include "ExplosionEffect.hpp"
-#include "ShootEffect.hpp"
+#include "ExplosionEffect2.hpp"
+#include "HeroShootEffect.hpp"
 #include "GameEngine.hpp"
 #include "Group.hpp"
 #include "IScene.hpp"
@@ -27,13 +27,13 @@ MODE2* Hero::getMode2Scene() {
     return dynamic_cast<MODE2*>(Engine::GameEngine::GetInstance().GetActiveScene());
 }
 void Hero::OnExplode() {
-    getMode2Scene()->EffectGroup->AddNewObject(new ExplosionEffect(Position.x, Position.y));
+    getMode2Scene()->EffectGroup->AddNewObject(new ExplosionEffect2(Position.x, Position.y));
     std::random_device dev;
     std::mt19937 rng(dev());
     std::uniform_int_distribution<std::mt19937::result_type> distId(1, 3);
     std::uniform_int_distribution<std::mt19937::result_type> dist(1, 20);
     for (int i = 0; i < 10; i++) {
-        getMode2Scene()->GroundEffectGroup->AddNewObject(new DirtyEffect("play/dirty-" + std::to_string(distId(rng)) + ".png", dist(rng), Position.x, Position.y));
+        getMode2Scene()->GroundEffectGroup->AddNewObject(new DirtyEffect2("play/dirty-" + std::to_string(distId(rng)) + ".png", dist(rng), Position.x, Position.y));
     }
 }
 Hero::Hero(std::string img, float x, float y, float radius, float speed, float hp, int price, float coolDown) :
@@ -50,7 +50,7 @@ void Hero::Hit(float damage) {
 
     }
 }
-void Hero::UpdatePath(const std::vector<std::vector<int>>& mapDistance) {
+void Hero::UpdatePath(const std::vector<std::vector<int>>& rmapDistance) {
     int x = static_cast<int>(floor(Position.x / MODE2::BlockSize));
     int y = static_cast<int>(floor(Position.y / MODE2::BlockSize));
     if (x < 0) x = 0;
@@ -58,18 +58,19 @@ void Hero::UpdatePath(const std::vector<std::vector<int>>& mapDistance) {
     if (y < 0) y = 0;
     if (y >= MODE2::MapHeight) y = MODE2::MapHeight - 1;
     Engine::Point pos(x, y);
-    int num = mapDistance[y][x];
+    int num = rmapDistance[y][x];
     if (num == -1) {
         num = 0;
         Engine::LOG(Engine::ERROR) << "Hero path finding error";
     }
-    path = std::vector<Engine::Point>(num + 1);
+    heropath = std::vector<Engine::Point>(num + 1);
     while (num != 0) {
         std::vector<Engine::Point> nextHops;
         for (auto& dir : MODE2::directions) {
             int x = pos.x + dir.x;
             int y = pos.y + dir.y;
-            if (x < 0 || x >= MODE2::MapWidth || y < 0 || y >= MODE2::MapHeight || mapDistance[y][x] != num - 1)
+            if (x < 0 || x >= MODE2::MapWidth || y < 0 || y >= MODE2::MapHeight ||
+            rmapDistance[y][x] != num - 1)
                 continue;
             nextHops.emplace_back(x, y);
         }
@@ -77,10 +78,10 @@ void Hero::UpdatePath(const std::vector<std::vector<int>>& mapDistance) {
         std::mt19937 rng(dev());
         std::uniform_int_distribution<std::mt19937::result_type> dist(0, nextHops.size() - 1);
         pos = nextHops[dist(rng)];
-        path[num] = pos;
+        heropath[num] = pos;
         num--;
     }
-    path[0] = MODE2::SpawnGridPoint;
+    heropath[0] = MODE2::SpawnGridPoint;
 }
 void Hero::Update(float deltaTime) {
     Sprite::Update(deltaTime);
@@ -133,29 +134,32 @@ void Hero::Update(float deltaTime) {
             CreateBullet();
         }
     }
+
+
     //Turret
     while (remainSpeed != 0) {
-        if (path.empty()) {
+        if (heropath.empty()) {
             Hit(hp);
-            getMode2Scene()->Attack();
             reachEndTime = 0;
             return;
         }
-        Engine::Point target = path.back() * MODE2::BlockSize + Engine::Point(MODE2::BlockSize / 2, MODE2::BlockSize / 2);
+        Engine::Point target = heropath.back() * MODE2::BlockSize + Engine::Point(MODE2::BlockSize / 2, MODE2::BlockSize / 2);
         Engine::Point vec = target - Position;
-        reachEndTime = (vec.Magnitude() + (path.size() - 1) * MODE2::BlockSize - remainSpeed) / speed;
+        float distance = vec.Magnitude();
+        reachEndTime = (vec.Magnitude() + (heropath.size() - 1) * MODE2::BlockSize - remainSpeed) / speed;
         Engine::Point normalized = vec.Normalize();
         if (remainSpeed - vec.Magnitude() > 0) {
             Position = target;
-            path.pop_back();
+            heropath.pop_back();
             remainSpeed -= vec.Magnitude();
         }
         else {
             Velocity = normalized * remainSpeed / deltaTime;
+            Position = Position + Velocity * deltaTime;
             remainSpeed = 0;
         }
     }
-    Rotation = atan2(Velocity.y, Velocity.x);
+    //Rotation = atan2(Velocity.y, Velocity.x);
     Sprite::Update(deltaTime);
 }
 void Hero::Draw() const {

@@ -8,7 +8,7 @@
 #include "RocketWeapon.hpp"
 #include "mode2.hpp"
 #include "Point.hpp"
-#include "ShootEffect.hpp"
+#include "HeroShootEffect.hpp"
 
 const int L4Hero::Price = 200;
 L4Hero::L4Hero(float x, float y) : Hero("play/turret-2.png", x, y, 600,45, 2, Price, 1)
@@ -27,7 +27,7 @@ void L4Hero::CreateBullet()
     Engine::Point bulletPosition = Position + original * 36;
     getMode2Scene()->WeaponGroup->AddNewObject(new RocketWeapon(RocketA + original * 36, diff, rotation, this));
     getMode2Scene()->WeaponGroup->AddNewObject(new RocketWeapon(RocketB + original * 36, diff, rotation, this));
-    getMode2Scene()->EffectGroup->AddNewObject(new ShootEffect(bulletPosition.x, bulletPosition.y));
+    getMode2Scene()->EffectGroup->AddNewObject(new HeroShootEffect(bulletPosition.x, bulletPosition.y));
     AudioHelper::PlayAudio("gun.wav");
 }
 

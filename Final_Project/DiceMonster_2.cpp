@@ -11,9 +11,9 @@
 #include "Hero.hpp"
 #include "AudioHelper.hpp"
 #include "Weapon.hpp"
-#include "DirtyEffect.hpp"
+#include "DirtyEffect2.hpp"
 #include "Monster.hpp"
-#include "ExplosionEffect.hpp"
+#include "ExplosionEffect2.hpp"
 #include "GameEngine.hpp"
 #include "Group.hpp"
 #include "IScene.hpp"
@@ -24,7 +24,7 @@ DiceMonster_2::DiceMonster_2(int x, int y) : Monster("play/dice-2.png", x, y, 25
 }
 
 void DiceMonster_2::OnExplode() {
-    getMode2Scene()->EffectGroup->AddNewObject(new ExplosionEffect(Position.x, Position.y));
+    getMode2Scene()->EffectGroup->AddNewObject(new ExplosionEffect2(Position.x, Position.y));
     std::random_device dev;
     std::mt19937 rng(dev());
     std::uniform_int_distribution<std::mt19937::result_type> distId(1, 3);
@@ -34,7 +34,7 @@ void DiceMonster_2::OnExplode() {
 
     for (int i = 0; i < 10; i++) {
         // Random add 10 dirty effects.
-        getMode2Scene()->GroundEffectGroup->AddNewObject(new DirtyEffect("play/dirty-" + std::to_string(distId(rng)) + ".png", dist(rng), Position.x, Position.y));
+        getMode2Scene()->GroundEffectGroup->AddNewObject(new DirtyEffect2("play/dirty-" + std::to_string(distId(rng)) + ".png", dist(rng), Position.x, Position.y));
     }
     Monster* monster;
     getMode2Scene()->MonsterGroup->AddNewObject(monster = new DiceMonster(Position.x, Position.y));

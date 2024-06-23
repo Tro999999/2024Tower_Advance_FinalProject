@@ -8,7 +8,7 @@
 #include "RocketWeapon.hpp"
 #include "mode2.hpp"
 #include "Point.hpp"
-#include "ShootEffect.hpp"
+#include "HeroShootEffect.hpp"
 #include "DoubleWeapon.hpp"
 #include "GoldenWeapon.hpp"
 
@@ -29,7 +29,7 @@ void L5Hero::CreateBullet()
 
     // Change bullet position to the front of the gun barrel.
     getMode2Scene()->WeaponGroup->AddNewObject(new DoubleWeapon(Position + normalized * 36, diff, rotation, this));
-    getMode2Scene()->EffectGroup->AddNewObject(new ShootEffect(Position.x + normalized.x * 36 , Position.y + normalized.y * 36));
+    getMode2Scene()->EffectGroup->AddNewObject(new HeroShootEffect(Position.x + normalized.x * 36 , Position.y + normalized.y * 36));
     AudioHelper::PlayAudio("gun.wav");
 
 

@@ -5,8 +5,8 @@
 #include "WoodBullet.hpp"
 #include "GoldenWeapon.hpp"
 #include "Group.hpp"
-#include "ShootEffect.hpp"
-#include "ExplosionEffect.hpp"
+#include "HeroShootEffect.hpp"
+#include "ExplosionEffect2.hpp"
 #include "Point.hpp"
 #include "mode2.hpp"
 
@@ -22,6 +22,6 @@ void NormalHero::CreateBullet() {
     Engine::Point normalized = diff.Normalize();
     // Change bullet position to the front of the gun barrel.
     getMode2Scene()->WeaponGroup->AddNewObject(new GoldenWeapon(Position + normalized * 36, diff, rotation, this));
-    //getPlayScene()->EffectGroup->AddNewObject(new ShootEffect(Position.x + normalized.x * 36, Position.y + normalized.y * 36));
+    //getPlayScene()->EffectGroup->AddNewObject(new HeroShootEffect(Position.x + normalized.x * 36, Position.y + normalized.y * 36));
     AudioHelper::PlayAudio("gun.wav");
 }

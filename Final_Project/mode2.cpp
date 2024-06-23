@@ -10,7 +10,7 @@
 #include <iostream>
 
 #include "AudioHelper.hpp"
-#include "DirtyEffect.hpp"
+#include "DirtyEffect2.hpp"
 #include "GameEngine.hpp"
 #include "Group.hpp"
 #include "IObject.hpp"
@@ -18,7 +18,7 @@
 #include "Label.hpp"
 #include "Point.hpp"
 #include "Resources.hpp"
-#include "MODE2.hpp"
+#include "mode2.hpp"
 // Hero
 #include "PlugGunHero.hpp"
 #include "L0Hero.hpp"
@@ -29,7 +29,7 @@
 #include "LaserHero.hpp"
 #include "MachineGunHero.hpp"
 #include "MissileHero.hpp"
-#include "Plane.hpp"
+#include "Plane2.hpp"
 
 #include "SettingScene.hpp"
 #include "ScoreboardScene.hpp"
@@ -48,7 +48,6 @@
 #include "DiceMonster.hpp"
 #include "DiceMonster_2.hpp"
 #include "BlueNormalMonster.hpp"
-#include "mode2.hpp"
 #include "Resources.hpp"
 #include "Sprite.hpp"
 #include "Hero.hpp"
@@ -84,6 +83,7 @@ Engine::Point MODE2::GetClientSize() {
 void MODE2::Initialize() {
     isTool = false;
     mapState.clear();
+    rmapState.clear();
     keyStrokes.clear();
     ticks = 0;
     deathCountDown = -1;
@@ -92,6 +92,7 @@ void MODE2::Initialize() {
     SpeedMult = 1;
     elapsedTime = 0;
     lastUpdateTime = 0;
+    currentSelectedButtonID = -1;
     // Add groups from bottom to top.
     AddNewObject(TileMapGroup = new Group());
     AddNewObject(GroundEffectGroup = new Group());
@@ -110,6 +111,7 @@ void MODE2::Initialize() {
 
     ReadMonsterWave();
     mapDistance = CalculateBFSDistance();
+    rmapDistance = CalculateDistance();
     ConstructUI();
     imgTarget = new Engine::Image("play/target.png", 0, 0);
     imgTarget->Visible = false;
@@ -189,6 +191,7 @@ void MODE2::Update(float deltaTime) {
             }
         }
     }
+
     deathCountDown = newDeathCountDown;
     if (SpeedMult == 0)
         AudioHelper::StopSample(deathBGMInstance);
@@ -204,17 +207,10 @@ void MODE2::Update(float deltaTime) {
             ticks += deltaTime;
             if (MonsterWaveData.empty()) {
                 if (MonsterGroup->GetObjects().empty()) {
-                    if(Check){
-                        MapId = 2;
-                        Check = 0;
-                        AudioHelper::ChangeSampleVolume(bgmInstance, 0.0);
-                        Engine::GameEngine::GetInstance().ChangeScene("play");
-                    }
-                    else Engine::GameEngine::GetInstance().ChangeScene("win");
+                    Engine::GameEngine::GetInstance().ChangeScene("win");
                 }
                 continue;
             }
-
 
             auto current = MonsterWaveData.front();
             if (ticks < current.second)
@@ -260,18 +256,6 @@ void MODE2::Update(float deltaTime) {
             Monster->Update(ticks);
         }
     }
-    for (auto& it : HeroGroup->GetObjects()) {
-        Hero* hero = dynamic_cast<Hero*>(it);
-        if (hero) {
-            hero->Update(ticks);
-        }
-    }
-    if (preview) {
-        preview->Position = Engine::GameEngine::GetInstance().GetMousePosition();
-        // To keep responding when paused.
-        /*preview->Update(deltaTime);*/
-        preview->Update(deltaTime);
-    }
 }
 void MODE2::Draw() const {
     IScene::Draw();
@@ -293,70 +277,28 @@ void MODE2::Draw() const {
     }
 }
 void MODE2::OnMouseDown(int button, int mx, int my) {
-    if ((button & 1) && !imgTarget->Visible && preview) {
-        // Cancel Hero construct.
-        UIGroup->RemoveObject(preview->GetObjectIterator());
-        preview = nullptr;
-    }
     IScene::OnMouseDown(button, mx, my);
 }
 void MODE2::OnMouseMove(int mx, int my) {
+    IScene::OnMouseMove(mx, my);
+    const int x = mx / BlockSize;
+    const int y = my / BlockSize;
+    if (!preview || x < 0 || x >= MapWidth || y < 0 || y >= MapHeight) {
+        imgTarget->Visible = false;
+        return;
+    }
+    imgTarget->Visible = true;
+    imgTarget->Position.x = x * BlockSize;
+    imgTarget->Position.y = y * BlockSize;
 }
 void MODE2::OnMouseUp(int button, int mx, int my) {
-    const Engine::Point EndCoordinate = Engine::Point(EndGridPoint.x * BlockSize + BlockSize / 2,
+    const Engine::Point SpawnCoordinate = Engine::Point(EndGridPoint.x * BlockSize + BlockSize / 2,
                                                       EndGridPoint.y * BlockSize + BlockSize / 2);
     IScene::OnMouseUp(button, mx, my);
     Hero* hero;
     if (!imgTarget->Visible)
         return;
     const int x = mx / BlockSize, y = my / BlockSize ;
-    if (button & 1) {
-        if ( preview->GetPrice()!= 0 && mapState[y][x] != 2 ) {
-            if (!preview)
-                return;
-            // Check if valid.
-            if (CheckSpaceValid(x, y)) {
-
-            }
-            else{
-                Engine::Sprite* sprite;
-                GroundEffectGroup->AddNewObject(sprite = new DirtyEffect("play/target-invalid.png", 1, x * BlockSize + BlockSize / 2, y * BlockSize + BlockSize / 2));
-                sprite->Rotation = 0;
-                return;
-            }
-            if(preview->price == 0){
-                return ;
-            }
-            // Purchase.
-            if(UTool == 1){
-            }
-            else {
-                EarnMoney(-preview->GetPrice());
-            }
-            UTool = 0;
-            // Remove Preview.
-            preview->GetObjectIterator()->first = false;
-            UIGroup->RemoveObject(preview->GetObjectIterator());
-            // Construct real Hero.
-            preview->Position.x = x * BlockSize + BlockSize / 2;
-            preview->Position.y = y * BlockSize + BlockSize / 2;
-            //preview->Enabled = true;
-            //preview->Preview = false;
-            preview->Tint = al_map_rgba(255, 255, 255, 255);
-            TowerGroup->AddNewObject(preview);
-
-            preview->Update(0);
-            preview->CountBullet = 0;
-            preview = nullptr;
-            OnMouseMove(mx, my);
-            return;
-        }
-        else if (UTool == 1 && preview->GetPrice() == 0 &&  (mapState[y][x] != 0 && mapState[y][x] != 1)) {
-            preview->GetObjectIterator()->first = false;
-            UIGroup->RemoveObject(preview->GetObjectIterator());
-            HeroGroup->AddNewObject(hero = new NormalHero(EndCoordinate.x, EndCoordinate.y));
-        }
-    }
 }
 void MODE2::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);
@@ -374,7 +316,7 @@ void MODE2::OnKeyDown(int keyCode) {
         std::vector<int> compare;
         for (auto &i: keyStrokes) compare.push_back((i));
         if (compare == MODE2::code){
-            EffectGroup->AddNewObject(new Plane());
+            EffectGroup->AddNewObject(new Plane2());
             money =  money + 10000;
         }
     }
@@ -437,12 +379,6 @@ void MODE2::Hit() {
         Engine::GameEngine::GetInstance().ChangeScene("lose");
     }
 }
-void MODE2::Attack() {
-    UILives->Text = std::string("Life ") + std::to_string(--lives);
-    if (lives <= 0) {
-        Engine::GameEngine::GetInstance().ChangeScene("win");
-    }
-}
 int MODE2::GetMoney() const {
     return money;
 }
@@ -477,10 +413,12 @@ void MODE2::ReadMap() {
         throw std::ios_base::failure("Map data is corrupted.");
     // Store map in 2d array.
     mapState = std::vector<std::vector<TileType>>(MapHeight, std::vector<TileType>(MapWidth));
+    rmapState = std::vector<std::vector<TileType>>(MapHeight, std::vector<TileType>(MapWidth));
     for (int i = 0; i < MapHeight; i++) {
         for (int j = 0; j < MapWidth; j++) {
             const int num = mapData[i * MapWidth + j];
             mapState[i][j] = num ? TILE_FLOOR : TILE_DIRT;
+            rmapState[i][j] = num ? TILE_FLOOR : TILE_DIRT;
             if (num)
                 TileMapGroup->AddNewObject(new Engine::Image("play/blue.png", j * BlockSize, i * BlockSize, BlockSize, BlockSize));
             else
@@ -489,7 +427,7 @@ void MODE2::ReadMap() {
     }
 }
 void MODE2::ReadMonsterWave() {
-    std::string filename = std::string("resources/enemy") + std::to_string(MapId) + ".txt";
+    std::string filename = std::string("resources/enemy1.txt");
     // Read Monster file.
     float type, wait, repeat;
     MonsterWaveData.clear();
@@ -633,28 +571,53 @@ void MODE2::ConstructButton(int id, std::string sprite, int price) {
 }
 
 void MODE2::UIBtnClicked(int id) {
-    const Engine::Point SpawnCoordinate = Engine::Point(EndGridPoint.x * BlockSize + BlockSize / 2,
-                                                        EndGridPoint.y * BlockSize + BlockSize / 2);
-    Hero *Hero;
+    const Engine::Point EndCoordinate = Engine::Point(EndGridPoint.x * BlockSize + BlockSize / 2,
+                                                      EndGridPoint.y * BlockSize + BlockSize / 2);
+    Hero *hero = nullptr;
+    Monster* Monster = nullptr;
     if(1) {
-        if (preview) {
-            UIGroup->RemoveObject(preview->GetObjectIterator());
-            preview = nullptr;
-        } else if (id == 0 && money >= PlugGunHero::Price)
-            HeroGroup->AddNewObject(Hero = new PlugGunHero(SpawnCoordinate.x, SpawnCoordinate.y));
-        else if (id == 1 && money >= L3Hero::Price)
-            HeroGroup->AddNewObject(Hero = new L3Hero(SpawnCoordinate.x, SpawnCoordinate.y));
-        else if (id == 2 && money >= L0Hero::Price)
-            HeroGroup->AddNewObject(Hero = new L0Hero(SpawnCoordinate.x, SpawnCoordinate.y));
-        else if (id == 3 && money >= L5Hero::Price)
-            HeroGroup->AddNewObject(Hero = new L5Hero(SpawnCoordinate.x, SpawnCoordinate.y));
-        else if (id == 6 && money >= LaserHero::Price)
-            HeroGroup->AddNewObject(Hero = new LaserHero(SpawnCoordinate.x, SpawnCoordinate.y));
-        else if (id == 7 && money >= MissileHero::Price)
-            HeroGroup->AddNewObject(Hero = new MissileHero(SpawnCoordinate.x, SpawnCoordinate.y));
-        else if (id == 8 && money >= MachineGunHero::Price)
-            HeroGroup->AddNewObject(Hero = new MachineGunHero(SpawnCoordinate.x, SpawnCoordinate.y));
-
+        if (id == 0 && money >= PlugGunHero::Price) {
+            HeroGroup->AddNewObject(hero = new PlugGunHero(EndCoordinate.x, EndCoordinate.y));
+            hero->UpdatePath(rmapDistance);
+            hero->Update(ticks);
+            EarnMoney(-PlugGunHero::Price);
+        }
+        else if (id == 1 && money >= L3Hero::Price){
+            HeroGroup->AddNewObject(hero = new L3Hero(EndCoordinate.x, EndCoordinate.y));
+            hero->UpdatePath(rmapDistance);
+            hero->Update(ticks);
+            EarnMoney(-L3Hero::Price);
+        }
+        else if (id == 2 && money >= L0Hero::Price) {
+            HeroGroup->AddNewObject(hero = new L0Hero(EndCoordinate.x, EndCoordinate.y));
+            hero->UpdatePath(rmapDistance);
+            hero->Update(ticks);
+            EarnMoney(-L0Hero::Price);
+        }
+        else if (id == 3 && money >= L5Hero::Price){
+            HeroGroup->AddNewObject(hero = new L5Hero(EndCoordinate.x, EndCoordinate.y));
+            hero->UpdatePath(rmapDistance);
+            hero->Update(ticks);
+            EarnMoney(-L5Hero::Price);
+        }
+        else if (id == 6 && money >= LaserHero::Price) {
+            HeroGroup->AddNewObject(hero = new LaserHero(EndCoordinate.x, EndCoordinate.y));
+            hero->UpdatePath(rmapDistance);
+            hero->Update(ticks);
+            EarnMoney(-LaserHero::Price);
+        }
+        else if (id == 7 && money >= MissileHero::Price){
+            HeroGroup->AddNewObject(hero = new MissileHero(EndCoordinate.x, EndCoordinate.y));
+            hero->UpdatePath(rmapDistance);
+            hero->Update(ticks);
+            EarnMoney(-MissileHero::Price);
+        }
+        else if (id == 8 && money >= MachineGunHero::Price) {
+            HeroGroup->AddNewObject(hero = new MachineGunHero(EndCoordinate.x, EndCoordinate.y));
+            hero->UpdatePath(rmapDistance);
+            hero->Update(ticks);
+            EarnMoney(-MachineGunHero::Price);
+        }
         else if (id == 12) {
             MODE2::EarnMoney(10);
             //UseTool = 3;
@@ -678,37 +641,19 @@ void MODE2::UIBtnClicked(int id) {
         UIGroup->AddNewObject(preview);
         OnMouseMove(Engine::GameEngine::GetInstance().GetMousePosition().x,
                     Engine::GameEngine::GetInstance().GetMousePosition().y);
+        /*
+        if (hero) {
+            HeroGroup->AddNewObject(hero);
+            //hero->Update(0);
+            hero->UpdatePath(rmapDistance);
+            // Compensate the time lost.
+            hero->Update(ticks);
+            hero = nullptr;
+            //OnMouseMove(mx,my);
+        }*/
     }
 }
 
-bool MODE2::CheckSpaceValid(int x, int y) {
-    if (x < 0 || x >= MapWidth || y < 0 || y >= MapHeight)
-        return false;
-
-    auto map00 = mapState[y][x];
-    mapState[y][x] = TILE_OCCUPIED;
-    std::vector<std::vector<int>> map = CalculateBFSDistance();
-    mapState[y][x] = map00;
-    if (map[0][0] == -1)
-        return false;
-    for (auto& it : MonsterGroup->GetObjects()) {
-        Engine::Point pnt;
-        pnt.x = floor(it->Position.x / BlockSize);
-        pnt.y = floor(it->Position.y / BlockSize);
-        if (pnt.x < 0) pnt.x = 0;
-        if (pnt.x >= MapWidth) pnt.x = MapWidth - 1;
-        if (pnt.y < 0) pnt.y = 0;
-        if (pnt.y >= MapHeight) pnt.y = MapHeight - 1;
-        if (map[pnt.y][pnt.x] == -1)
-            return false;
-    }
-    // All Monster have path to exit.
-    mapState[y][x] = TILE_OCCUPIED;
-    mapDistance = map;
-    for (auto& it : MonsterGroup->GetObjects())
-        dynamic_cast<Monster*>(it)->UpdatePath(mapDistance);
-    return true;
-}
 std::vector<std::vector<int>> MODE2::CalculateBFSDistance() {
     // Reverse BFS to find path.
     std::vector<std::vector<int>> map(MapHeight, std::vector<int>(std::vector<int>(MapWidth, -1)));
@@ -736,6 +681,53 @@ std::vector<std::vector<int>> MODE2::CalculateBFSDistance() {
     }
     return map;
 }
+
+std::vector<std::vector<int>> MODE2::CalculateDistance() {
+    // Reverse BFS to find path.
+    std::vector<std::vector<int>> rmap(MapHeight, std::vector<int>(std::vector<int>(MapWidth, -1)));
+    std::queue<Engine::Point> rque;
+    // Push end point.
+    // BFS from end point.
+    if (rmapState[MapHeight - 1][MapWidth - 1] != 0)
+        return rmap;
+    rque.push(Engine::Point(MapWidth - 1, MapHeight - 1));
+    rmap[MapHeight - 1][MapWidth - 1] = 0;
+    while (!rque.empty()) {
+        Engine::Point p = rque.front();
+        rque.pop();
+        for (auto &c : directions) {
+            int x = p.x + c.x;
+            int y = p.y + c.y;
+            if (x < 0 || x >= MapWidth || y < 0 || y >= MapHeight ||
+                rmap[y][x] != -1 || rmapState[y][x] != 0) {
+                continue;
+            } else {
+                rmap[y][x] = rmap[p.y][p.x] + 1;
+                rque.push(Engine::Point(x, y));
+            }
+        }
+    }
+    // 反转距离，计算从每个节点到终点的距离。
+    int maxDistance = 0;
+    for (int i = 0; i < MapHeight; ++i) {
+        for (int j = 0; j < MapWidth; ++j) {
+            if (rmap[i][j] > maxDistance) {
+                maxDistance = rmap[i][j];
+            }
+        }
+    }
+
+    for (int i = 0; i < MapHeight; ++i) {
+        for (int j = 0; j < MapWidth; ++j) {
+            if (rmap[i][j] != -1) {
+                rmap[i][j] = maxDistance - rmap[i][j];
+            }
+        }
+    }
+    return rmap;
+}
+
+
 
 float MODE2::GetElapsedTime() const {
     return elapsedTime;

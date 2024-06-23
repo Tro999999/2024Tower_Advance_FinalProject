@@ -10,7 +10,7 @@
 #include "L2Hero.hpp"
 #include "mode2.hpp"
 #include "Point.hpp"
-#include "ShootEffect.hpp"
+#include "HeroShootEffect.hpp"
 
 const int L2Hero::Price = 60;
 L2Hero::L2Hero(float x, float y) :
@@ -25,7 +25,7 @@ void L2Hero::CreateBullet() {
     Engine::Point normalized = diff.Normalize();
     getMode2Scene()->WeaponGroup->AddNewObject(new DoubleWeapon(Position + normalized * 36, diff, rotation, this));
 
-    getMode2Scene()->EffectGroup->AddNewObject(new ShootEffect(Position.x + normalized.x * 36 , Position.y + normalized.y * 36));
+    getMode2Scene()->EffectGroup->AddNewObject(new HeroShootEffect(Position.x + normalized.x * 36 , Position.y + normalized.y * 36));
     AudioHelper::PlayAudio("gun.wav");
 }
 

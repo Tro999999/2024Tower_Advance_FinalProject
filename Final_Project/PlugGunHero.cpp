@@ -8,8 +8,8 @@
 #include "PlugGunHero.hpp"
 #include "mode2.hpp"
 #include "Hero.hpp"
-#include "ShootEffect.hpp"
-#include "ExplosionEffect.hpp"
+#include "HeroShootEffect.hpp"
+#include "ExplosionEffect2.hpp"
 #include "Point.hpp"
 
 const int PlugGunHero::Price = 40;
@@ -24,6 +24,6 @@ void PlugGunHero::CreateBullet() {
     Engine::Point normalized = diff.Normalize();
     // Change bullet position to the front of the gun barrel.
     getMode2Scene()->WeaponGroup->AddNewObject(new GoldenWeapon(Position + normalized * 36, diff, rotation, this));
-    getMode2Scene()->EffectGroup->AddNewObject(new ShootEffect(Position.x + normalized.x * 36, Position.y + normalized.y * 36));
+    getMode2Scene()->EffectGroup->AddNewObject(new HeroShootEffect(Position.x + normalized.x * 36, Position.y + normalized.y * 36));
     AudioHelper::PlayAudio("gun.wav");
 }

@@ -18,7 +18,7 @@ class MODE2;
 
 class Hero : public Engine::Sprite {
 protected:
-    std::vector<Engine::Point> path;
+    std::vector<Engine::Point> heropath;
     std::list<Hero*>::iterator lockedTurretIterator;
     float speed;
     float coolDown;
@@ -34,7 +34,7 @@ public:
     float gentime = 0.0;
     float ticks;
     Monster* Target = nullptr;
-    std::vector<std::vector<int>> mapDistance;
+    std::vector<std::vector<int>> rmapDistance;
     Hero(std::string imgTurret, float x, float y, float radius, float speed, float hp, int price, float coolDown);
     void Hit(float damage);
     void UpdatePath(const std::vector<std::vector<int>>& mapDistance);
