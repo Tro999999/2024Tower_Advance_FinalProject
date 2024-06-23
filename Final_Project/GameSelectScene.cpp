@@ -47,9 +47,9 @@ void GameSelectScene::GameModeOnClick(int mode) {
         Engine::GameEngine::GetInstance().ChangeScene("mode1");
     }
     else if(mode == 2){
-        Engine::GameEngine::GetInstance().ChangeScene("mode2");
+        Engine::GameEngine::GetInstance().ChangeScene("stage-select");
     }
     else{
-        Engine::GameEngine::GetInstance().ChangeScene("mode3");
+        Engine::GameEngine::GetInstance().ChangeScene("mode2");
     }
 }

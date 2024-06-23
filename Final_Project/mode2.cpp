@@ -390,7 +390,7 @@ void MODE2::EarnMoney(int money) {
 
 
 void MODE2::ReadMap() {
-    std::string filename = std::string("resources/map1.txt") ;
+    std::string filename = std::string("resources/map4.txt") ;
     // Read map file.
     char s;
     std::vector<bool> mapData;

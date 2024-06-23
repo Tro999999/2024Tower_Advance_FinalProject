@@ -47,6 +47,7 @@ Monster::Monster(std::string img, float x, float y, float radius, float speed, f
         Engine::Sprite(img, x, y), speed(speed), hp(hp), money(money), maxSpeed(speed), slowRemainTime(0) {
     CollisionRadius = radius;
     reachEndTime = 0;
+
 }
 void Monster::Hit(float damage) {
     hp -= damage;
